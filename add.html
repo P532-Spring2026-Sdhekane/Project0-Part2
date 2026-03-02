@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Duck</title>
+</head>
+<body>
+<h1>Add a New Duck</h1>
+
+<div>
+    <label>Id:</label>
+    <input id="duckId" type="text"/>
+</div>
+
+<div>
+    <label>Type:</label>
+    <input id="duckType" type="text"/>
+</div>
+
+<div>
+    <label>Image:</label>
+    <input id="imageInput" type="file" accept="image/*"/>
+</div>
+
+<button onclick="addTheDuck()">Add the duck</button>
+
+<script>
+    const host = "http://localhost:8080";
+
+    async function addTheDuck() {
+        let duckIdNode = document.getElementById("duckId");
+        let duckId = duckIdNode.value;
+        let duckTypeNode = document.getElementById("duckType");
+        let duckType = duckTypeNode.value;
+
+        let duck = {id: duckId, type: duckType};
+
+        try {
+            // First save the duck data
+            let response = await fetch(host + "/ducks", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(duck)
+            });
+
+            if (response.ok) {
+                alert("Duck added successfully!");
+                // Then upload the image
+                await submitTheImage(duckId);
+            } else {
+                alert("Failed to add duck");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error adding duck");
+        }
+    }
+
+    async function submitTheImage(duckId) {
+        let imageInput = document.getElementById("imageInput");
+
+        if (!imageInput.files[0]) {
+            alert("Please select an image");
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("file", imageInput.files[0]);
+
+        let request = {
+            method: "POST",
+            body: formData
+        };
+
+        try {
+            let response = await fetch(host + "/ducks/" + duckId + "/image", request);
+            let result = await response.json();
+            alert("Image uploaded successfully!");
+            return result;
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            alert("Error uploading image");
+        }
+    }
+</script>
+</body>
+</html>
