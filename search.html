@@ -48,7 +48,7 @@
 
 <script>
   let ducks = [];
-  const host = "http://localhost:8080";
+  const host = "https://ducks-service-latest-4twh.onrender.com";
 
   async function getAll() {
     try {
@@ -106,7 +106,6 @@
     if (ducks.length === 0) {
       await getAll();
     }
-
 
     table.innerHTML = "";
 

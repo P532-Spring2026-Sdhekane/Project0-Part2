@@ -26,7 +26,7 @@
 <button onclick="addTheDuck()">Add the duck</button>
 
 <script>
-    const host = "http://localhost:8080";
+    const host = "https://ducks-service-latest-4twh.onrender.com";
 
     async function addTheDuck() {
         let duckIdNode = document.getElementById("duckId");
@@ -37,7 +37,6 @@
         let duck = {id: duckId, type: duckType};
 
         try {
-            // First save the duck data
             let response = await fetch(host + "/ducks", {
                 method: "POST",
                 headers: {
