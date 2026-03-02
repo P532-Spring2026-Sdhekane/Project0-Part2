@@ -9,13 +9,41 @@
 <h1>Add a New Duck</h1>
 
 <div>
-    <label>Id:</label>
-    <input id="duckId" type="text"/>
+    <label>Name:</label>
+    <input id="duckName" type="text" value="Donald"/>
 </div>
 
 <div>
     <label>Type:</label>
-    <input id="duckType" type="text"/>
+    <input id="duckType" type="text" value="Mallard"/>
+</div>
+
+<div>
+    <label>Color:</label>
+    <input id="duckColor" type="text" value="Green"/>
+</div>
+
+<div>
+    <label>Size (1-10):</label>
+    <input id="duckSize" type="number" value="5"/>
+</div>
+
+<div>
+    <label>Price ($):</label>
+    <input id="duckPrice" type="number" value="10"/>
+</div>
+
+<div>
+    <label>Quack Sound:</label>
+    <input id="duckQuack" type="text" value="Quack"/>
+</div>
+
+<div>
+    <label>Can Fly?:</label>
+    <select id="duckFly">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+    </select>
 </div>
 
 <div>
@@ -29,14 +57,41 @@
     const host = "https://ducks-service-latest-4twh.onrender.com";
 
     async function addTheDuck() {
-        let duckIdNode = document.getElementById("duckId");
-        let duckId = duckIdNode.value;
+        let duckNameNode = document.getElementById("duckName");
+        let duckName = duckNameNode ? duckNameNode.value : "Default Duck";
+
         let duckTypeNode = document.getElementById("duckType");
         let duckType = duckTypeNode.value;
 
-        let duck = {id: duckId, type: duckType};
+        let duckColorNode = document.getElementById("duckColor");
+        let duckColor = duckColorNode ? duckColorNode.value : "Green";
+
+        let duckSizeNode = document.getElementById("duckSize");
+        let duckSize = duckSizeNode ? parseInt(duckSizeNode.value) : 5;
+
+        let duckPriceNode = document.getElementById("duckPrice");
+        let duckPrice = duckPriceNode ? parseInt(duckPriceNode.value) : 10;
+
+        let duckQuackNode = document.getElementById("duckQuack");
+        let duckQuack = duckQuackNode ? duckQuackNode.value : "Quack";
+
+        let duckFlyNode = document.getElementById("duckFly");
+        let duckFly = duckFlyNode ? duckFlyNode.value === "true" : true;
+
+        let duck = {
+            name: duckName,
+            type: duckType,
+            color: duckColor,
+            size: duckSize,
+            price: duckPrice,
+            quackSound: duckQuack,
+            flyBehavior: duckFly
+        };
+
+        console.log("Sending duck:", duck);
 
         try {
+            // First save the duck data
             let response = await fetch(host + "/ducks", {
                 method: "POST",
                 headers: {
@@ -46,39 +101,43 @@
             });
 
             if (response.ok) {
-                alert("Duck added successfully!");
-                // Then upload the image
+                let duckId = await response.text();
+                alert("Duck added successfully! ID: " + duckId);
+                // Then upload the image if there is one
                 await submitTheImage(duckId);
             } else {
-                alert("Failed to add duck");
+                let errorText = await response.text();
+                console.error("Server error:", errorText);
+                alert("Failed to add duck: " + response.status);
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("Error adding duck");
+            alert("Error adding duck: " + error.message);
         }
     }
 
     async function submitTheImage(duckId) {
         let imageInput = document.getElementById("imageInput");
 
-        if (!imageInput.files[0]) {
-            alert("Please select an image");
+        if (!imageInput || !imageInput.files[0]) {
+            console.log("No image to upload");
             return;
         }
 
         let formData = new FormData();
         formData.append("file", imageInput.files[0]);
 
-        let request = {
-            method: "POST",
-            body: formData
-        };
-
         try {
-            let response = await fetch(host + "/ducks/" + duckId + "/image", request);
-            let result = await response.json();
-            alert("Image uploaded successfully!");
-            return result;
+            let response = await fetch(host + "/ducks/" + duckId + "/image", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                alert("Image uploaded successfully!");
+            } else {
+                alert("Image upload failed");
+            }
         } catch (error) {
             console.error("Error uploading image:", error);
             alert("Error uploading image");
